@@ -47,6 +47,7 @@ public struct HighlightedTextEditor: NSViewRepresentable, HighlightingTextEditor
     public func makeNSView(context: Context) -> ScrollableTextView {
         let textView = ScrollableTextView()
         textView.delegate = context.coordinator
+        textView.textView.font = defaultEditorFont
         runIntrospect(textView)
 
         return textView

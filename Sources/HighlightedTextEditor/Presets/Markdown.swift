@@ -72,7 +72,10 @@ public extension Sequence where Iterator.Element == HighlightRule {
             ]),
             HighlightRule(
                 pattern: linkOrImageRegex,
-                formattingRule: TextFormattingRule(key: .underlineStyle, value: NSUnderlineStyle.single.rawValue)
+                formattingRules: [
+                    TextFormattingRule(fontTraits: boldTraits),
+                    TextFormattingRule(key: .foregroundColor, value: NSColor.systemBlue),
+                ]
             ),
             HighlightRule(
                 pattern: linkOrImageTagRegex,
