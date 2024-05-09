@@ -47,6 +47,13 @@ public struct HighlightedTextEditor: NSViewRepresentable, HighlightingTextEditor
     public func makeNSView(context: Context) -> ScrollableTextView {
         let textView = ScrollableTextView()
         textView.delegate = context.coordinator
+        let emptyString = ""
+        let defaultRuleEditorFont = highlightRules
+            .first { $0.pattern == NSRegularExpression.all }?
+            .formattingRules
+            .first { $0.key == .font }?
+            .calculateValue?(emptyString, Range(uncheckedBounds: (lower: emptyString.startIndex, upper: emptyString.endIndex))) as? NSFont
+        textView.textView.font = defaultRuleEditorFont ?? defaultEditorFont
         runIntrospect(textView)
 
         return textView
