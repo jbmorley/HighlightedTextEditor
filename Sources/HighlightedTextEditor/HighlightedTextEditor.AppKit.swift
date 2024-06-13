@@ -47,13 +47,6 @@ public struct HighlightedTextEditor: NSViewRepresentable, HighlightingTextEditor
     public func makeNSView(context: Context) -> ScrollableTextView {
         let textView = ScrollableTextView()
         textView.delegate = context.coordinator
-        let emptyString = ""
-        let defaultRuleEditorFont = highlightRules
-            .first { $0.pattern == NSRegularExpression.all }?
-            .formattingRules
-            .first { $0.key == .font }?
-            .calculateValue?(emptyString, Range(uncheckedBounds: (lower: emptyString.startIndex, upper: emptyString.endIndex))) as? NSFont
-        textView.textView.font = defaultRuleEditorFont ?? defaultEditorFont
         runIntrospect(textView)
 
         return textView
@@ -61,7 +54,6 @@ public struct HighlightedTextEditor: NSViewRepresentable, HighlightingTextEditor
 
     public func updateNSView(_ view: ScrollableTextView, context: Context) {
         context.coordinator.updatingNSView = true
-        let typingAttributes = view.textView.typingAttributes
 
         let highlightedText = HighlightedTextEditor.getHighlightedText(
             text: text,
@@ -71,7 +63,15 @@ public struct HighlightedTextEditor: NSViewRepresentable, HighlightingTextEditor
         view.attributedText = highlightedText
         runIntrospect(view)
         view.selectedRanges = context.coordinator.selectedRanges
-        view.textView.typingAttributes = typingAttributes
+
+        // Update the typing attributes to match the attributes at the current insertion point.
+        if highlightedText.length > 0, let insertionIndex = view.selectedRanges.first?.rangeValue.location {
+            let insertionIndex = max(0, min(insertionIndex, highlightedText.length - 1))
+            view.textView.typingAttributes = highlightedText.attributes(at: insertionIndex, effectiveRange: nil)
+        } else {
+            view.textView.typingAttributes = [.font: defaultEditorFont]
+        }
+
         context.coordinator.updatingNSView = false
     }
 
